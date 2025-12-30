@@ -1,0 +1,10 @@
+name: Mobs
+version: 0.0.1
+api: 5.0.0
+author: Matze
+description: Mob plugin
+main: matze\mobs\Mobs
+mcpe-protocol: [898]
+permissions:
+  command.togglemobdebug.use:
+    default: op
