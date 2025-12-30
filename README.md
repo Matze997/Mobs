@@ -77,6 +77,7 @@ version: 0.0.1
 This plugin is basically a copy of Minecraft JE mob system
 
 Some parts where taken from [Altay](https://github.com/TuranicTeam/Altay) and from an old project of mine
+[Minecraft Source Code](https://github.com/mahtomedi/minecraft/tree/main/src/main/java/net/minecraft/world/entity)
 
 
 Made by Matze, December 2022
