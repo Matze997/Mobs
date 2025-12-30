@@ -38,6 +38,7 @@ class MobsConfig {
                 }
                 $config->set($property->getName(), $property->getValue());
             }
+            $config->set("version", $version);
             $config->save();
         }
 
