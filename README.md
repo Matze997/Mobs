@@ -32,11 +32,6 @@ This plugin is not meant to be efficient. (At the moment)
 🚫 Natural spawning
 ```
 
-
-# Requires
-
-[libPMMLP](https://github.com/PMMLP/libPMMLP)
-
 # Screenshots
 
 ![Animals](https://github.com/Matze997/Mobs/blob/master/images/animals.png)
