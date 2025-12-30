@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace matze\mobs\util;
 
 use matze\mobs\Mobs;
+use pocketmine\math\Vector3;
 use pocketmine\plugin\Plugin;
 use pocketmine\utils\VersionString;
 use ReflectionClass;
@@ -56,6 +57,8 @@ class MobsConfig {
 
     public static int $maxPathfinderIterations = 24;
     public static int $maxRandomPositionGeneratorIterations = 8;
+
+    public static bool $animalsDropXpWhenBred = true;
 
     public static bool $registerPigs = true;
     public static int $pigDespawnDistance = 128;

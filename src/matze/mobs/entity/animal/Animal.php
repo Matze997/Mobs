@@ -9,6 +9,7 @@ use matze\mobs\entity\ai\navigation\GroundPathNavigation;
 use matze\mobs\entity\ai\navigation\PathNavigation;
 use matze\mobs\entity\ai\pathfinder\evaluator\NodeEvaluator;
 use matze\mobs\entity\ai\pathfinder\evaluator\WalkNodeEvaluator;
+use matze\mobs\util\MobsConfig;
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -76,8 +77,11 @@ abstract class Animal extends AgeableMob {
         $animal->setInLove(false);
         $this->setInLove(false);
 
-        //TODO: Add check for game rule 'doMobLoot'
-        $this->getWorld()->dropExperience($this->location, $this->getBreedXpAmount());
+        if(MobsConfig::$animalsDropXpWhenBred) {
+            //TODO: Add check for game rule 'doMobLoot'
+            //TODO: PocketMine does not have game rules at the moment
+            $this->getWorld()->dropExperience($this->location, $this->getBreedXpAmount());
+        }
     }
 
     public function isInLove(): bool {
