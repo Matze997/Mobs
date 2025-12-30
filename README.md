@@ -52,11 +52,8 @@ maxPathfinderIterations: 24
 # Set how much random positions should be generated (Higher => More CPU, better positions)
 maxRandomPositionGeneratorIterations: 8
 
-# Set if mob should be registered (Applies to every mob)
 registerPigs: true
-# Set at which distance this mob should be despawned (Applies to every mob)
 pigDespawnDistance: 128
-# Set distance in which this mob won´t despawn (Applies to every mob)
 pigNoDespawnDistance: 32
 
 registerCows: true
