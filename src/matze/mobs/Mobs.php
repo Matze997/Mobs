@@ -36,6 +36,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\protocol\types\entity\EntityIds;
 use pocketmine\plugin\PluginBase;
 use pocketmine\Server;
+use pocketmine\utils\Config;
 use pocketmine\world\format\io\GlobalItemDataHandlers;
 use pocketmine\world\World;
 

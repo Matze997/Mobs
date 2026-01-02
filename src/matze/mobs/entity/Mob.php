@@ -185,7 +185,7 @@ abstract class Mob extends Living {
             }
         }
 
-        if(MobsConfig::$DEBUG) {
+        if(MobsConfig::$debug) {
             $this->updateTimeList[] = $this->updateTime;
             if(count($this->updateTimeList) > 20) {
                 array_shift($this->updateTimeList);

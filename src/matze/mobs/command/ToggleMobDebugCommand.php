@@ -18,8 +18,8 @@ class ToggleMobDebugCommand extends Command{
         if(!$this->testPermission($sender)) {
             return;
         }
-        MobsConfig::$DEBUG = !MobsConfig::$DEBUG;
-        if(MobsConfig::$DEBUG) {
+        MobsConfig::$debug = !MobsConfig::$debug;
+        if(MobsConfig::$debug) {
             $sender->sendMessage("Mob debug is now enabled.");
         } else {
             $sender->sendMessage("Mob debug is now disabled.");
@@ -29,8 +29,8 @@ class ToggleMobDebugCommand extends Command{
             foreach($world->getEntities() as $entity) {
                 if($entity instanceof Mob) {
                     $entity->setNameTag("");
-                    $entity->setNameTagVisible(MobsConfig::$DEBUG);
-                    $entity->setNameTagAlwaysVisible(MobsConfig::$DEBUG);
+                    $entity->setNameTagVisible(MobsConfig::$debug);
+                    $entity->setNameTagAlwaysVisible(MobsConfig::$debug);
                 }
             }
         }
