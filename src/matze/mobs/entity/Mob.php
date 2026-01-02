@@ -76,10 +76,8 @@ abstract class Mob extends Living {
 
         $this->registerGoals();
 
-        if(MobsConfig::$debug) {
-            $this->setNameTagVisible();
-            $this->setNameTagAlwaysVisible();
-        }
+        $this->setNameTagVisible();
+        $this->setNameTagAlwaysVisible();
     }
 
     abstract protected function initNodeEvaluator(): NodeEvaluator;
@@ -152,11 +150,11 @@ abstract class Mob extends Living {
         $this->ignoreUpdateLimitForOneTick = $ignoreUpdateLimit;
     }
 
-    public function checkDespawn(): void {
+    public function checkDespawn(): bool {
         $world = $this->getWorld();
         if($world->getDifficulty() === World::DIFFICULTY_PEACEFUL && $this->shouldDespawnInPeaceful()) {
             $this->flagForDespawn();
-            return;
+            return true;
         }
 
         if(!$this->isPersistenceRequired() && !$this->requiresCustomPersistence()) {
@@ -165,7 +163,7 @@ abstract class Mob extends Living {
                 $inReach = $player->getLocation()->distanceSquared($this->getLocation()) <= ($this->getNoDespawnDistance() ** 2);
                 if($this->noActionTime > 600 && random_int(0, 800) === 0 && $this->removeWhenFarAway() && !$inReach) {
                     $this->flagForDespawn();
-                    return;
+                    return true;
                 }
 
                 if($inReach) {
@@ -177,16 +175,12 @@ abstract class Mob extends Living {
         } else {
             $this->noActionTime = 0;
         }
+        return false;
     }
 
     public function checkSimulation(): void {
         $player = $this->getWorld()->getNearestEntity($this->location, $this->getSimulationDistance(), Player::class);
         if($player === null) {
-            if($this->isSimulationState(SimulationState::NONE)) {
-                var_dump("Stop simulation!");
-                $this->getNavigation()->stop();
-                $this->setMotion(Vector3::zero());
-            }
             $this->simulationState = $this->getSimulationBehavior() === SimulationState::LIMITED ? SimulationState::LIMITED : SimulationState::NONE;
         } else {
             $this->simulationState = SimulationState::FULL;
@@ -296,8 +290,7 @@ abstract class Mob extends Living {
     }
 
     public function canSaveWithChunk(): bool{
-        $this->checkDespawn();
-        return $this->isFlaggedForDespawn();
+        return !$this->checkDespawn();
     }
 
     protected function updateLiquidState(): void {

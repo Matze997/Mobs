@@ -26,11 +26,10 @@ class MobsConfig {
         $update = $alwaysUpdate = false;
         if(is_file($filePath)) {
             $config = new Config($filePath);
-            if(!$config->exists("version") || $pluginVersion->compare(new VersionString($config->get("version")), true) > 0) {
+            if(!$config->exists("version") || $pluginVersion->compare(new VersionString($config->get("version")), true) !== 0) {
                 $update = true;
-            }
-            //Makes development easier
-            if($config->get("alwaysUpdate")) {
+            } elseif($config->get("alwaysUpdate")) {
+                //Makes development easier
                 $logger->warning("Always update mode is enabled. DO NOT USE IN PRODUCTION!");
                 $update = $alwaysUpdate = true;
             }
@@ -67,7 +66,11 @@ class MobsConfig {
                         $this->writeLine($content, $str);
                     }
                 }
-                $this->writeLine($content, $property->getName(), $property->getValue());
+                if(isset($config) && $config->exists($property->getName())) {
+                    $this->writeLine($content, $property->getName(), $config->get($property->getName()));
+                } else {
+                    $this->writeLine($content, $property->getName(), $property->getValue());
+                }
             }
             file_put_contents($filePath, $content);
             $config = new Config($filePath);
@@ -79,7 +82,7 @@ class MobsConfig {
                 continue;
             }
             $propertyName = $property->getName();
-            $this::${$propertyName} = $config->get($propertyName);
+            $this::${$propertyName} = $config->get($propertyName, $this::${$propertyName});
         }
 
         $logger->debug("Successfully loaded config!");
@@ -122,7 +125,7 @@ class MobsConfig {
     /**
      * Choose how animals shall despawn:
      * 0: Never
-     * 1: Only despawn if the mob has been interacted with (Damage, Tamed, Tempt,...)
+     * 1: Only despawn if the mob had no interaction (Damage, Tamed, Tempt,...)
      * 2: Always
      */
     public static int $animalDespawnBehavior = 0;

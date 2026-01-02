@@ -121,4 +121,8 @@ abstract class Animal extends AgeableMob {
     public function getSimulationBehavior(): int {
         return MobsConfig::$animalSimulationBehavior;
     }
+
+    public function requiresCustomPersistence(): bool{
+        return true;
+    }
 }

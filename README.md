@@ -30,6 +30,7 @@ This plugin is not meant to be efficient. (At the moment)
 🚫 Leashes
 🚫 Individual block cost
 🚫 Natural spawning
+🚫 Nametags
 ```
 
 # Screenshots
@@ -41,44 +42,65 @@ This plugin is not meant to be efficient. (At the moment)
 # Config
 
 ```
-# Set the maximum pathfinder iterations (Higher => More CPU, more precise pathfinding)
-maxPathfinderIterations: 24
+#Mob Config file
+version=0.0.3
+debug=no
 
-# Set how much random positions should be generated (Higher => More CPU, better positions)
-maxRandomPositionGeneratorIterations: 8
+# Pathfinder settings
+# Choose how many iterations the pathfinder makes until it stops (Higher value => More CPU usage)
+maxPathfinderIterations=24
+# Choose how many random positions are generated and checked until the system stops (Higher value => More "real" positions, but higher CPU usage)
+maxRandomPositionGeneratorIterations=8
 
-registerPigs: true
-pigDespawnDistance: 128
-pigNoDespawnDistance: 32
+# Animal settings
+animalsDropXpWhenBred=yes
+# Choose how animals shall despawn:
+# 0: Never
+# 1: Only despawn if the mob had no interaction (Damage, Tamed, Tempt,...)
+# 2: Always
+animalDespawnBehavior=0
+# Choose how animals shall behave when outside of simulation range:
+# 0: Full simulation (Until they are out of the pocketmine simulation distance)
+# 1: Limited simulation (No pathfinding, except when hurt and tempted) <- Recommended but not active by default
+# 2: No simulation
+animalSimulationBehavior=0
 
-registerCows: true
-cowDespawnDistance: 128
-cowNoDespawnDistance: 32
+# Pig settings
+registerPigs=yes
+# Animals beyond that distance will despawn immediately
+pigDespawnDistance=128
+# Animals beyond that distance can despawn randomly
+pigNoDespawnDistance=32
+# See animalSimulationBehavior for more information
+pigSimulationDistance=32
 
-registerChickens: true
-chickenDespawnDistance: 128
-chickenNoDespawnDistance: 32
+# Cow settings
+registerCows=yes
+cowDespawnDistance=128
+cowNoDespawnDistance=32
+cowSimulationDistance=32
 
-registerSheep: true
-sheepDespawnDistance: 128
-sheepNoDespawnDistance: 32
+# Chicken settings
+registerChickens=yes
+chickenDespawnDistance=128
+chickenNoDespawnDistance=32
+chickenSimulationDistance=32
 
-# Set if sheep can destroy grass while eating
-sheepCanDestroyGrass: true
-
-
-# Do not touch!
-version: 0.0.1
-
+# Sheep settings
+registerSheep=yes
+sheepDespawnDistance=128
+sheepNoDespawnDistance=32
+sheepSimulationDistance=32
+sheepCanDestroyGrass=yes
 ```
 
 # Credits
 
-This plugin is basically a copy of Minecraft JE mob system
+This plugin is basically a copy of [Minecraft JE mob system](https://github.com/mahtomedi/minecraft/tree/main/src/main/java/net/minecraft/world/entity)
 
 Some parts where taken from [Altay](https://github.com/TuranicTeam/Altay) and from an old project of mine
-[Minecraft Source Code](https://github.com/mahtomedi/minecraft/tree/main/src/main/java/net/minecraft/world/entity)
 
 
 Made by Matze, December 2022
+
 Updated to PM5 in december 2025
