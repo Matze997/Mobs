@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace matze\mobs;
 
+use matze\mobs\command\ReloadMobConfigCommand;
 use matze\mobs\command\TestCommand;
 use matze\mobs\command\ToggleMobDebugCommand;
 use matze\mobs\entity\animal\Chicken;
@@ -43,22 +44,21 @@ use pocketmine\world\World;
 class Mobs extends PluginBase {
     private static self $instance;
 
-    protected function onLoad(): void{
-        self::$instance = $this;
-
-        new MobsConfig();
-
-        $this->registerMobs();
-    }
-
     public static function getInstance(): Mobs{
         return self::$instance;
     }
 
     protected function onEnable(): void{
+        self::$instance = $this;
+
+        new MobsConfig();
+
         Server::getInstance()->getCommandMap()->register($this->getName(), new ToggleMobDebugCommand());
+        Server::getInstance()->getCommandMap()->register($this->getName(), new ReloadMobConfigCommand());
 
         Server::getInstance()->getPluginManager()->registerEvents(new EventListener(), $this);
+
+        $this->registerMobs();
     }
 
     protected function registerMobs(): void {

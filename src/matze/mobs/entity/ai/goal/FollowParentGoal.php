@@ -6,6 +6,7 @@ namespace matze\mobs\entity\ai\goal;
 
 use matze\mobs\entity\animal\Animal;
 use matze\mobs\entity\Mob;
+use matze\mobs\util\SimulationState;
 use pocketmine\entity\Entity;
 use RuntimeException;
 
@@ -32,7 +33,7 @@ class FollowParentGoal extends Goal {
     }
 
     public function canUse(): bool{
-        if(!$this->mob->isBaby()) {
+        if(!$this->mob->isBaby() || !$this->mob->isSimulationState(SimulationState::FULL)) {
             return false;
         }
         $parents = array_filter($this->mob->getWorld()->getNearbyEntities($this->mob->getBoundingBox()->expandedCopy(8, 4, 8), $this->mob), function(Entity $entity): bool {

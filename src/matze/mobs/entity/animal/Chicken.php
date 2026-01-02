@@ -128,6 +128,10 @@ class Chicken extends Animal {
         return MobsConfig::$chickenNoDespawnDistance;
     }
 
+    public function getSimulationDistance(): int{
+        return MobsConfig::$chickenSimulationDistance;
+    }
+
     public function getFallDistance(): float{
         return 0.0;
     }

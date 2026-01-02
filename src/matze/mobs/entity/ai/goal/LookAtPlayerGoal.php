@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace matze\mobs\entity\ai\goal;
 
+use matze\mobs\util\SimulationState;
 use pocketmine\entity\Entity;
 
 class LookAtPlayerGoal extends Goal {
@@ -25,7 +26,7 @@ class LookAtPlayerGoal extends Goal {
     }
 
     public function canUse(): bool{
-        if(random_int(0, 100) / 100 >= $this->probability) {
+        if(random_int(0, 100) / 100 >= $this->probability || $this->mob->isSimulationState(SimulationState::LIMITED)) {
             return false;
         }
         $this->target = $this->mob->getWorld()->getNearestEntity($this->mob->getPosition(), $this->distance, $this->targetType);
@@ -33,6 +34,9 @@ class LookAtPlayerGoal extends Goal {
     }
 
     public function canContinueToUse(): bool{
+        if($this->mob->isSimulationState(SimulationState::LIMITED, SimulationState::NONE)) {
+            return false;
+        }
         $target = $this->target;
         if($target === null) {
             return false;

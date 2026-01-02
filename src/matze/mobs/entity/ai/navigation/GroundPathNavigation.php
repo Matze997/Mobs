@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace matze\mobs\entity\ai\navigation;
 
 use matze\mobs\util\BlockHeightCalculator;
+use matze\mobs\util\MobsConfig;
+use pocketmine\color\Color;
+use pocketmine\world\particle\DustParticle;
 
 class GroundPathNavigation extends PathNavigation {
     private int $jumpTicks = 0;
@@ -23,6 +26,18 @@ class GroundPathNavigation extends PathNavigation {
                 if($this->node === null) {
                     $this->stop();
                     return;
+                }
+            }
+
+            if(MobsConfig::$debug) {
+                $world = $location->getWorld();
+                $color = new Color(
+                    ($this->mob->getId() * 8 + $this->mob->getId()) % 255,
+                    ($this->mob->getId() * 7 + $this->mob->getId()) % 255,
+                    ($this->mob->getId() * 9 + $this->mob->getId()) % 255,
+                );
+                foreach($this->path->getPathPoints() as $pathPoint) {
+                    $world->addParticle($pathPoint, new DustParticle($color));
                 }
             }
 

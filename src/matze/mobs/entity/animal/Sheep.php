@@ -135,6 +135,10 @@ class Sheep extends Animal {
         return MobsConfig::$sheepNoDespawnDistance;
     }
 
+    public function getSimulationDistance(): int{
+        return MobsConfig::$sheepSimulationDistance;
+    }
+
     public function onInteract(Player $player, Vector3 $clickPos): bool{
         $inventory = $player->getInventory();
         $item = $inventory->getItemInHand();

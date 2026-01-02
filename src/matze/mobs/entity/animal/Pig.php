@@ -102,6 +102,10 @@ class Pig extends Animal {
         return MobsConfig::$pigNoDespawnDistance;
     }
 
+    public function getSimulationDistance(): int{
+        return MobsConfig::$pigSimulationDistance;
+    }
+
     public function getBabyChance(): int{
         return 5;
     }

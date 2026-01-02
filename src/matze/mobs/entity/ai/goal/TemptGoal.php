@@ -9,6 +9,7 @@ use matze\mobs\entity\animal\Animal;
 use matze\mobs\entity\Mob;
 use pocketmine\item\Item;
 use pocketmine\player\Player;
+use pocketmine\Server;
 
 class TemptGoal extends Goal {
     protected int $calmDown = 0;
@@ -78,11 +79,14 @@ class TemptGoal extends Goal {
     }
 
     public function tick(): void{
+        $this->mob->ignoreUpdateLimitForOneTick();
         $this->mob->getLookControl()->setTarget($this->target->getPosition());
         if($this->mob->getPosition()->distanceSquared($this->target->getPosition()) < 6.25) {
             $this->mob->getNavigation()->stop();
             return;
         }
-        $this->mob->getNavigation()->findPath($this->target->getPosition(), true, $this->speed);
+        if((Server::getInstance()->getTick() + $this->mob->getId()) % 12 === 0) {
+            $this->mob->getNavigation()->findPath($this->target->getPosition(), true, $this->speed);
+        }
     }
 }

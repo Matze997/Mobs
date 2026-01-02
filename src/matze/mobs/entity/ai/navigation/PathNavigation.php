@@ -35,7 +35,7 @@ abstract class PathNavigation {
 
     public function internalTick(): void {
         $this->tick();
-       if(!$this->done && $this->target !== null) {
+        if(!$this->done && $this->target !== null) {
            $mob = $this->mob;
            $position = $mob->getPosition();
            if($this->lastPosition !== null && $position->distanceSquared($this->lastPosition) <= 0.01){
@@ -51,7 +51,7 @@ abstract class PathNavigation {
                $this->stuckTicks = 0;
            }
            $this->lastPosition = $position;
-       }
+        }
     }
 
    abstract public function tick(): void;
@@ -83,7 +83,7 @@ abstract class PathNavigation {
     }
 
     public function scheduleRecompute(int $ticks = 40): void {
-        $this->nextRecomputeTick = Server::getInstance()->getTick() + $ticks;
+        $this->nextRecomputeTick = Server::getInstance()->getTick() + $ticks;//TODO
     }
 
     public function isDone(): bool{

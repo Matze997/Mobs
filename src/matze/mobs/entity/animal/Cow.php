@@ -110,4 +110,8 @@ class Cow extends Animal {
     public function getNoDespawnDistance(): int{
         return MobsConfig::$cowNoDespawnDistance;
     }
+
+    public function getSimulationDistance(): int{
+        return MobsConfig::$cowSimulationDistance;
+    }
 }

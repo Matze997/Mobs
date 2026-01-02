@@ -23,11 +23,16 @@ class MobsConfig {
         $reflection = new ReflectionClass($this);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_STATIC);
         $filePath = $plugin->getDataFolder()."mobs.properties";
-        $update = false;
+        $update = $alwaysUpdate = false;
         if(is_file($filePath)) {
             $config = new Config($filePath);
             if(!$config->exists("version") || $pluginVersion->compare(new VersionString($config->get("version")), true) > 0) {
                 $update = true;
+            }
+            //Makes development easier
+            if($config->get("alwaysUpdate")) {
+                $logger->warning("Always update mode is enabled. DO NOT USE IN PRODUCTION!");
+                $update = $alwaysUpdate = true;
             }
         } else {
             $update = true;
@@ -35,7 +40,9 @@ class MobsConfig {
 
         //Auto Updater
         if($update) {
-            $logger->warning("Plugin config is not up-to-date. Config will be updated to V".$version);
+            if(!$alwaysUpdate) {
+                $logger->warning("Plugin config is not up-to-date. Config will be updated to V".$version);
+            }
 
             if(is_file($filePath)) {
                 rename($filePath, $filePath."_old");
@@ -43,6 +50,9 @@ class MobsConfig {
 
             $content = "#Mob Config file\r\n";
             $this->writeLine($content, "version", $version);
+            if($alwaysUpdate) {
+                $this->writeLine($content, "alwaysUpdate", true);
+            }
             foreach($properties as $property) {
                 if(!$property->isPublic() || !$property->isStatic()) {
                     continue;
@@ -116,6 +126,13 @@ class MobsConfig {
      * 2: Always
      */
     public static int $animalDespawnBehavior = 0;
+    /**
+     * Choose how animals shall behave when outside of simulation range:
+     * 0: Full simulation (Until they are out of the pocketmine simulation distance)
+     * 1: Limited simulation (No pathfinding, except when hurt and tempted) <- Recommended but not active by default
+     * 2: No simulation
+     */
+    public static int $animalSimulationBehavior = SimulationState::FULL;
 
     /**
      * #Pig settings
@@ -129,6 +146,10 @@ class MobsConfig {
      * Animals beyond that distance can despawn randomly
      */
     public static int $pigNoDespawnDistance = 32;
+    /**
+     * See animalSimulationBehavior for more information
+     */
+    public static int $pigSimulationDistance = 32;
 
     /**
      * #Cow settings
@@ -136,6 +157,7 @@ class MobsConfig {
     public static bool $registerCows = true;
     public static int $cowDespawnDistance = 128;
     public static int $cowNoDespawnDistance = 32;
+    public static int $cowSimulationDistance = 32;
 
     /**
      * #Chicken settings
@@ -143,6 +165,7 @@ class MobsConfig {
     public static bool $registerChickens = true;
     public static int $chickenDespawnDistance = 128;
     public static int $chickenNoDespawnDistance = 32;
+    public static int $chickenSimulationDistance = 32;
 
     /**
      * #Sheep settings
@@ -150,5 +173,6 @@ class MobsConfig {
     public static bool $registerSheep = true;
     public static int $sheepDespawnDistance = 128;
     public static int $sheepNoDespawnDistance = 32;
+    public static int $sheepSimulationDistance = 32;
     public static bool $sheepCanDestroyGrass = true;
 }

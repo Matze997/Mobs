@@ -52,6 +52,10 @@ class PanicGoal extends Goal {
         $this->mob->getNavigation()->findPath($this->target, false, $this->speed);
     }
 
+    public function tick(): void{
+        $this->mob->ignoreUpdateLimitForOneTick();
+    }
+
     public function isInterruptable(): bool{
         return false;
     }

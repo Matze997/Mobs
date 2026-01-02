@@ -10,6 +10,7 @@ use matze\mobs\entity\ai\navigation\PathNavigation;
 use matze\mobs\entity\ai\pathfinder\evaluator\NodeEvaluator;
 use matze\mobs\entity\ai\pathfinder\PathFinder;
 use matze\mobs\entity\animal\Animal;
+use matze\mobs\util\SimulationState;
 use matze\mobs\util\MobsConfig;
 use pocketmine\block\Liquid;
 use pocketmine\entity\Entity;
@@ -22,6 +23,7 @@ use pocketmine\nbt\tag\CompoundTag;
 use pocketmine\network\mcpe\NetworkBroadcastUtils;
 use pocketmine\network\mcpe\protocol\MoveActorAbsolutePacket;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataCollection;
+use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataFlags;
 use pocketmine\network\mcpe\protocol\types\entity\EntityMetadataProperties;
 use pocketmine\player\Player;
 use pocketmine\Server;
@@ -56,6 +58,10 @@ abstract class Mob extends Living {
     private float $updateTime = 0.0;
     private array $updateTimeList = [];
 
+    private int $simulationState = SimulationState::FULL;
+
+    private bool $ignoreUpdateLimitForOneTick = false;
+
     protected function initEntity(CompoundTag $nbt): void{
         parent::initEntity($nbt);
 
@@ -69,6 +75,11 @@ abstract class Mob extends Living {
         $this->navigation = $this->initPathNavigation();
 
         $this->registerGoals();
+
+        if(MobsConfig::$debug) {
+            $this->setNameTagVisible();
+            $this->setNameTagAlwaysVisible();
+        }
     }
 
     abstract protected function initNodeEvaluator(): NodeEvaluator;
@@ -101,6 +112,22 @@ abstract class Mob extends Living {
         return 32;
     }
 
+    public function getSimulationDistance(): int {
+        return 32;
+    }
+
+    public function getSimulationBehavior(): int {
+        return SimulationState::FULL;
+    }
+
+    public function isSimulationState(int ...$states): bool {
+        $list = [];
+        foreach($states as $state) {
+            $list[] = $state;
+        }
+        return in_array($this->simulationState, $list, true);
+    }
+
     public function shouldDespawnInPeaceful(): bool {
         return false;
     }
@@ -121,17 +148,48 @@ abstract class Mob extends Living {
         return true;
     }
 
+    public function ignoreUpdateLimitForOneTick(bool $ignoreUpdateLimit = true): void {
+        $this->ignoreUpdateLimitForOneTick = $ignoreUpdateLimit;
+    }
+
     public function checkDespawn(): void {
         $world = $this->getWorld();
         if($world->getDifficulty() === World::DIFFICULTY_PEACEFUL && $this->shouldDespawnInPeaceful()) {
             $this->flagForDespawn();
-        } elseif(!$this->isPersistenceRequired() && !$this->requiresCustomPersistence()) {
+            return;
+        }
+
+        if(!$this->isPersistenceRequired() && !$this->requiresCustomPersistence()) {
             $player = $world->getNearestEntity($this->location, $this->getDespawnDistance(), Player::class);
-            if($player === null && $this->removeWhenFarAway()) {
+            if($player !== null) {
+                $inReach = $player->getLocation()->distanceSquared($this->getLocation()) <= ($this->getNoDespawnDistance() ** 2);
+                if($this->noActionTime > 600 && random_int(0, 800) === 0 && $this->removeWhenFarAway() && !$inReach) {
+                    $this->flagForDespawn();
+                    return;
+                }
+
+                if($inReach) {
+                    $this->noActionTime = 0;
+                }
+            } elseif($this->removeWhenFarAway()) {
                 $this->flagForDespawn();
             }
         } else {
             $this->noActionTime = 0;
+        }
+    }
+
+    public function checkSimulation(): void {
+        $player = $this->getWorld()->getNearestEntity($this->location, $this->getSimulationDistance(), Player::class);
+        if($player === null) {
+            if($this->isSimulationState(SimulationState::NONE)) {
+                var_dump("Stop simulation!");
+                $this->getNavigation()->stop();
+                $this->setMotion(Vector3::zero());
+            }
+            $this->simulationState = $this->getSimulationBehavior() === SimulationState::LIMITED ? SimulationState::LIMITED : SimulationState::NONE;
+        } else {
+            $this->simulationState = SimulationState::FULL;
         }
     }
 
@@ -163,41 +221,51 @@ abstract class Mob extends Living {
 
     public function onUpdate(int $currentTick): bool{
         $ms = microtime(true);
+        if(($currentTick + $this->getId()) % 20 === 0) {
+            $this->checkDespawn();
+            $this->checkSimulation();
+        }
+
+        if($this->isSimulationState(SimulationState::NONE)) {
+            return false;
+        }
 
         $this->navigation->internalTick();
         $this->goalSelector->tick();
         $this->targetSelector->tick();
         $this->lookControl->tick();
 
-        if($currentTick % 20 === 0) {
-            $this->checkDespawn();
-        }
         if($this->isBodyInsideOfLiquid()) {
             $this->motion->x /= 1.2;
             $this->motion->z /= 1.2;
         }
 
-        if($this->canBePushed()) {
-            foreach($this->getWorld()->getCollidingEntities($this->getBoundingBox()->expandedCopy(0.2, 0, 0.2), $this) as $entity){
-                if($entity instanceof Mob && $entity->canBePushed()) {
-                    $this->applyEntityCollision($entity);
+        $update = true;
+        if($this->ignoreUpdateLimitForOneTick || $this->isSimulationState(SimulationState::FULL) || ($this->isSimulationState(SimulationState::LIMITED) && $currentTick % 10 === 0)) {
+            if($this->canBePushed()) {
+                foreach($this->getWorld()->getCollidingEntities($this->getBoundingBox()->expandedCopy(0.2, 0, 0.2), $this) as $entity){
+                    if($entity instanceof self && $entity->canBePushed()) {
+                        $this->applyEntityCollision($entity);
+                        $this->ignoreUpdateLimitForOneTick();
+                    }
                 }
             }
-        }
 
-        if(MobsConfig::$debug) {
-            $this->updateTimeList[] = $this->updateTime;
-            if(count($this->updateTimeList) > 20) {
-                array_shift($this->updateTimeList);
+            if(MobsConfig::$debug) {
+                $this->updateTimeList[] = $this->updateTime;
+                if(count($this->updateTimeList) > 20) {
+                    array_shift($this->updateTimeList);
+                }
+                $debug = [];
+                $this->getDebugInfo($debug);
+                $this->setNameTag(implode("\n§r§7", $debug));
             }
-            $debug = [];
-            $this->getDebugInfo($debug);
-            $this->setNameTag(implode("\n§r§7", $debug));
-        }
 
-        $update = parent::onUpdate($currentTick);
-        $this->updateLiquidState();
+            $this->updateLiquidState();
+            $update = parent::onUpdate($currentTick);
+        }
         $this->updateTime = microtime(true) - $ms;
+        $this->ignoreUpdateLimitForOneTick = false;
         return $update;
     }
 
@@ -383,6 +451,7 @@ abstract class Mob extends Living {
         $info[] = "§6Collision§7: ".(int)$this->isCollidedHorizontally;
         $info[] = "§6Liquid§7: ".(int)$this->isBodyInsideOfLiquid();
         $info[] = "§6Update§7: ".round(array_sum($this->updateTimeList) / count($this->updateTimeList), 5);
+        $info[] = "§6Tick§7: ".Server::getInstance()->getTick();
         $info[] = "§6Goals§7:";
         foreach($this->goalSelector->getAvailableGoals() as $goal) {
             if($goal->isRunning()) {

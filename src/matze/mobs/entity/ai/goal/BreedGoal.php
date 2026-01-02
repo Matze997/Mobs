@@ -7,6 +7,7 @@ namespace matze\mobs\entity\ai\goal;
 use http\Exception\RuntimeException;
 use matze\mobs\entity\animal\Animal;
 use matze\mobs\entity\Mob;
+use matze\mobs\util\SimulationState;
 use pocketmine\entity\Entity;
 
 class BreedGoal extends Goal {
@@ -36,7 +37,7 @@ class BreedGoal extends Goal {
     }
 
     public function canUse(): bool{
-        if(!$this->mob->isInLove()) {
+        if(!$this->mob->isInLove() || $this->mob->isSimulationState(SimulationState::LIMITED)) {
             return false;
         }
         $this->partner = $this->findPartnerOnTinder();
@@ -44,7 +45,7 @@ class BreedGoal extends Goal {
     }
 
     public function canContinueToUse(): bool{
-        return $this->partner->isAlive() && $this->partner->isInLove() && $this->loveTicks < 60;
+        return $this->partner->isAlive() && $this->partner->isInLove() && $this->loveTicks < 60 && !$this->mob->isSimulationState(SimulationState::NONE);
     }
 
     protected function stop(): void{
@@ -63,6 +64,9 @@ class BreedGoal extends Goal {
         }
     }
 
+    /**
+     * Why the hell did I choose this name in 2022? IDK... But its funny haha
+     */
     protected function findPartnerOnTinder(): ?Animal {
         $targets = array_filter($this->mob->getWorld()->getNearbyEntities($this->mob->getBoundingBox()->expandedCopy(8, 4, 8)), function(Entity $entity): bool {
             return $this->mob->canMate($entity);

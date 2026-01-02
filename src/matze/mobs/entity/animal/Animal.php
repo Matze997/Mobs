@@ -10,6 +10,7 @@ use matze\mobs\entity\ai\navigation\PathNavigation;
 use matze\mobs\entity\ai\pathfinder\evaluator\NodeEvaluator;
 use matze\mobs\entity\ai\pathfinder\evaluator\WalkNodeEvaluator;
 use matze\mobs\util\MobsConfig;
+use matze\mobs\util\SimulationState;
 use pocketmine\entity\Entity;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
@@ -115,5 +116,9 @@ abstract class Animal extends AgeableMob {
     public function getDebugInfo(array &$info): void{
         parent::getDebugInfo($info);
         $info[] = "§6Love Ticks§7: ".$this->inLove;
+    }
+
+    public function getSimulationBehavior(): int {
+        return MobsConfig::$animalSimulationBehavior;
     }
 }

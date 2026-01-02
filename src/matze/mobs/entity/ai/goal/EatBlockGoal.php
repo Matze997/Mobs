@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace matze\mobs\entity\ai\goal;
 
 use matze\mobs\util\MobsConfig;
+use matze\mobs\util\SimulationState;
 use pocketmine\block\VanillaBlocks;
 use pocketmine\network\mcpe\protocol\ActorEventPacket;
 use pocketmine\network\mcpe\protocol\types\ActorEvent;
@@ -18,7 +19,7 @@ class EatBlockGoal extends Goal {
     }
 
     public function canUse(): bool{
-        if(random_int(0, ($this->mob->isBaby() ? 50 : 1000)) !== 0) {
+        if(random_int(0, ($this->mob->isBaby() ? 50 : 1000)) !== 0 || $this->mob->isSimulationState(SimulationState::LIMITED)) {
             return false;
         }
         return $this->mob->getWorld()->getBlock($this->mob->getPosition()->down())->isSameState(VanillaBlocks::GRASS());
@@ -35,7 +36,7 @@ class EatBlockGoal extends Goal {
     }
 
     public function canContinueToUse(): bool{
-        return $this->eatAnimationTick > 0;
+        return $this->eatAnimationTick > 0 && !$this->mob->isSimulationState(SimulationState::LIMITED, SimulationState::NONE);
     }
 
     public function tick(): void{

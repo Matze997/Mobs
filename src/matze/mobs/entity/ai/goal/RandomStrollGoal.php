@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace matze\mobs\entity\ai\goal;
 
 use matze\mobs\util\RandomPositionGenerator;
+use matze\mobs\util\SimulationState;
 use pocketmine\math\Vector3;
 use pocketmine\Server;
 
@@ -18,14 +19,14 @@ class RandomStrollGoal extends Goal {
     }
 
     public function canUse(): bool{
-        if(Server::getInstance()->getTick() <= $this->next) {
+        if(Server::getInstance()->getTick() <= $this->next || $this->mob->isSimulationState(SimulationState::LIMITED, SimulationState::NONE)) {
             return false;
         }
         return ($this->target = $this->getPosition()) !== null;
     }
 
     public function canContinueToUse(): bool{
-        return !$this->mob->getNavigation()->isDone();
+        return !$this->mob->getNavigation()->isDone() && !$this->mob->isSimulationState(SimulationState::LIMITED, SimulationState::NONE);
     }
 
     protected function start(): void{

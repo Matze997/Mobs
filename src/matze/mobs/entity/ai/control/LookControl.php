@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace matze\mobs\entity\ai\control;
 
 use matze\mobs\entity\Mob;
+use matze\mobs\util\SimulationState;
 use pocketmine\math\Vector3;
 
 class LookControl implements Control {
@@ -55,8 +56,10 @@ class LookControl implements Control {
         }
 
         $this->mob->setHeadYaw($targetYaw);
-        $this->mob->setRotation($location->yaw, $pitch + (random_int(0, 100) / 10000));//HACK
-        $this->mob->setForceMovementUpdate();
+        $this->mob->setRotation($location->yaw, $pitch);
+        $motion = $this->mob->getMotion();
+        $this->mob->setMotion($motion->add(0, 0.000001, 0));
+        $this->mob->ignoreUpdateLimitForOneTick();
         $this->mob->scheduleUpdate();
     }
 }

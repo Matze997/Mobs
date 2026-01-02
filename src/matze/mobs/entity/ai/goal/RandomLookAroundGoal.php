@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace matze\mobs\entity\ai\goal;
 
 use matze\mobs\util\RandomPositionGenerator;
+use matze\mobs\util\SimulationState;
 
 class RandomLookAroundGoal extends Goal {
     protected int $lookTicks = 0;
@@ -14,7 +15,7 @@ class RandomLookAroundGoal extends Goal {
     }
 
     public function canUse(): bool{
-        return random_int(0, 100) / 100 < 0.02 && $this->mob->getNavigation()->isDone();
+        return random_int(0, ($this->mob->isSimulationState(SimulationState::LIMITED) ? 1000 : 100)) < 2 && $this->mob->getNavigation()->isDone();
     }
 
     protected function start(): void{
